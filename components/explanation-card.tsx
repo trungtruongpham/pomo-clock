@@ -25,17 +25,36 @@ export function ExplanationCard({
 
 export function PomodoroExplanation() {
   return (
-    <ExplanationCard title="What is Pomodoro Technique?">
-      <p className="text-black/90 dark:text-white/90 mb-2 sm:mb-3">
-        The Pomodoro Technique is a time management method developed by
-        Francesco Cirillo. It uses a timer to break work into intervals,
+    <ExplanationCard title="What is the Pomodoro Technique?">
+      <p className="text-black/90 dark:text-white/90 mb-3 sm:mb-4">
+        The <strong>Pomodoro Technique</strong> is a popular time management
+        method developed by Francesco Cirillo in the late 1980s. It uses a{" "}
+        <strong>pomodoro timer</strong> to break work into intervals,
         traditionally 25 minutes in length (called &quot;pomodoros&quot;),
-        separated by short breaks.
+        separated by short breaks to promote sustained concentration and prevent
+        mental fatigue.
       </p>
+
+      <h3 className="font-semibold text-base mb-2 dark:text-white">
+        How the Pomodoro Study Method Works:
+      </h3>
+
+      <ol className="list-decimal pl-5 mb-3 space-y-1 text-black/90 dark:text-white/90">
+        <li>Choose a task you want to complete</li>
+        <li>
+          Set the <strong>pomodoro timer</strong> for 25 minutes
+        </li>
+        <li>Work on the task until the timer rings</li>
+        <li>Take a short 5-minute break</li>
+        <li>Every 4 pomodoros, take a longer 15-30 minute break</li>
+      </ol>
+
       <p className="text-black/90 dark:text-white/90">
-        This technique improves productivity by encouraging focused work
-        sessions followed by regular breaks to promote sustained concentration
-        and prevent mental fatigue.
+        Using a dedicated <strong>pomodoro clock</strong> like PomoClock helps
+        improve productivity by encouraging focused work sessions and regular
+        breaks, making it ideal for students and professionals who need to
+        maintain high concentration during <strong>study</strong> or work
+        sessions.
       </p>
     </ExplanationCard>
   );

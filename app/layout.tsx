@@ -17,12 +17,64 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PomoClock - A Pomodoro Timer for Productivity",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://pomostudy.app"
+  ),
+  title: {
+    default: "PomoClock - Pomodoro Timer for Productive Study Sessions",
+    template: "%s | PomoClock - Pomodoro Timer",
+  },
   description:
-    "A customizable Pomodoro timer to boost your productivity and focus",
+    "Free online Pomodoro timer for effective study sessions. Boost productivity with customizable work/break intervals, task tracking, and focus management using the Pomodoro technique.",
+  keywords: [
+    "pomodoro",
+    "pomodoro timer",
+    "pomodoro technique",
+    "pomodoro clock",
+    "pomodoro study",
+    "focus timer",
+    "study timer",
+    "productivity tool",
+    "time management",
+    "study method",
+  ],
+  authors: [{ name: "PomoClock", url: "https://pomostudy.app" }],
+  creator: "PomoClock",
+  applicationName: "PomoClock",
+  publisher: "PomoClock",
+
+  openGraph: {
+    type: "website",
+    title: "PomoClock - Pomodoro Timer for Productive Study Sessions",
+    description:
+      "Enhance your study sessions with this free online Pomodoro timer. Customize work/break intervals, track tasks, and improve focus with the Pomodoro technique.",
+    siteName: "PomoClock",
+    locale: "en_US",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "PomoClock Pomodoro Timer",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "PomoClock - Pomodoro Timer for Study",
+    description:
+      "Boost your productivity with this free online Pomodoro timer for effective study sessions. Customizable work/break intervals and task tracking.",
+    images: ["/og-image.png"],
+    creator: "@pomostudy",
+  },
+
   icons: {
     icon: icon.src,
+    apple: "/apple-touch-icon.png",
   },
+
+  category: "Productivity",
 };
 
 export default async function RootLayout({
