@@ -43,8 +43,6 @@ export function LoginForm() {
         return;
       }
 
-      console.log("Login successful, refreshing and redirecting...");
-
       // Force a full page reload to ensure session is properly initialized
       window.location.href = "/";
     } catch (err) {
@@ -76,7 +74,9 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-      <h2 className="text-2xl font-bold mb-6 text-center">Log in</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center dark:text-black">
+        Log in
+      </h2>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">

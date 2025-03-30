@@ -8,8 +8,13 @@ import {
 } from "@/lib/utils";
 import { TimerMode, useTimerStore } from "@/store/timer-store";
 import { useTaskStore } from "@/store/task-store";
+import { cn } from "@/lib/utils";
 
-export function Timer() {
+interface TimerProps {
+  focusMode?: boolean;
+}
+
+export function Timer({ focusMode = false }: TimerProps) {
   const {
     mode,
     timeLeft,
@@ -78,25 +83,36 @@ export function Timer() {
 
   return (
     <div
-      className={`w-full rounded-lg  ${getTimerBackground(
-        mode
-      )} text-white shadow-2xl`}
+      className={cn(
+        `w-full rounded-lg ${getTimerBackground(mode)} text-white shadow-2xl`,
+        focusMode && "p-3 sm:p-6 transform transition-all duration-300"
+      )}
     >
-      <div className="mx-auto p-4">
-        <div className="flex justify-center mb-8">
+      <div className="mx-auto p-3 sm:p-4">
+        <div className="flex justify-center mb-4 sm:mb-8">
           <TimerModeTabs currentMode={mode} onModeChange={setMode} />
         </div>
 
-        <div className="text-center mb-8">
-          <h2 className="text-8xl font-bold mb-2">{formatTime(timeLeft)}</h2>
+        <div className="text-center mb-6 sm:mb-8">
+          <h2
+            className={cn(
+              "text-6xl sm:text-7xl md:text-8xl font-bold mb-2",
+              focusMode && "text-7xl sm:text-8xl md:text-9xl"
+            )}
+          >
+            {formatTime(timeLeft)}
+          </h2>
         </div>
 
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center space-x-3 sm:space-x-4">
           <button
             onClick={handleStartPause}
-            className={`rounded-md px-8 py-2 text-xl font-bold ${getTimerDarkerBackground(
-              mode
-            )} hover:opacity-90 transition-opacity`}
+            className={cn(
+              `rounded-md px-6 sm:px-8 py-2 text-lg sm:text-xl font-bold ${getTimerDarkerBackground(
+                mode
+              )} hover:opacity-90 transition-opacity`,
+              focusMode && "px-8 sm:px-10 py-2 sm:py-3 text-xl sm:text-2xl"
+            )}
           >
             {isRunning ? "PAUSE" : "START"}
           </button>
@@ -104,7 +120,7 @@ export function Timer() {
           {isRunning && (
             <button
               onClick={resetTimer}
-              className="rounded-md px-4 py-2 text-white/70 hover:text-white transition-colors"
+              className="rounded-md px-3 sm:px-4 py-2 text-white/70 hover:text-white transition-colors"
             >
               RESET
             </button>
@@ -123,9 +139,9 @@ function TimerModeTabs({
   onModeChange: (mode: TimerMode) => void;
 }) {
   return (
-    <div className="flex rounded-full bg-white/20 p-1">
+    <div className="flex rounded-full bg-white/20 p-1 text-xs sm:text-sm">
       <button
-        className={`px-4 py-2 rounded-full text-sm font-semibold ${
+        className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full font-medium ${
           currentMode === "pomodoro" ? "bg-white/30" : ""
         }`}
         onClick={() => onModeChange("pomodoro")}
@@ -133,7 +149,7 @@ function TimerModeTabs({
         Pomodoro
       </button>
       <button
-        className={`px-4 py-2 rounded-full text-sm font-semibold ${
+        className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full font-medium ${
           currentMode === "shortBreak" ? "bg-white/30" : ""
         }`}
         onClick={() => onModeChange("shortBreak")}
@@ -141,7 +157,7 @@ function TimerModeTabs({
         Short Break
       </button>
       <button
-        className={`px-4 py-2 rounded-full text-sm font-semibold ${
+        className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full font-medium ${
           currentMode === "longBreak" ? "bg-white/30" : ""
         }`}
         onClick={() => onModeChange("longBreak")}

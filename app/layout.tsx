@@ -4,6 +4,7 @@ import "./globals.css";
 import icon from "@/public/icon.png";
 import Header from "@/components/header/header";
 import { createServerSupabase } from "@/lib/supabase-server";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,18 +40,16 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
       >
-        <div className={`min-h-screen flex flex-col `}>
-          <Header initialUser={user} />
-          <main className="flex-1 py-8">
-            <div className="max-w-5xl mx-auto px-4">{children}</div>
-          </main>
-
-          <footer className="py-6 text-center text-white/70">
-            <div className="max-w-5xl mx-auto">
-              <p>Made with ♥ - Inspired by Pomofocus.io</p>
-            </div>
-          </footer>
-        </div>
+        <ThemeProvider>
+          <div className={`min-h-screen flex flex-col`}>
+            <Header initialUser={user} />
+            <main className="flex-1 py-8">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                {children}
+              </div>
+            </main>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

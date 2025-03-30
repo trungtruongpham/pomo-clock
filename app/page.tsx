@@ -1,31 +1,42 @@
+"use client";
+
+import { useState } from "react";
 import { TaskList } from "@/components/tasks/task-list";
 import { Timer } from "../components/pomodoro/timer";
+import { PomodoroExplanation } from "@/components/explanation-card";
+import { FocusMode } from "@/components/focus-mode-switch";
 
 export default function Home() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="flex flex-col gap-8">
-        <Timer />
+  const [focusModeActive, setFocusModeActive] = useState(false);
 
-        <div className="bg-white bg-opacity-10 p-6 rounded-lg text-black">
-          <h2 className="text-xl font-bold mb-4">
-            What is Pomodoro Technique?
-          </h2>
-          <p className="text-black/90 mb-3">
-            The Pomodoro Technique is a time management method developed by
-            Francesco Cirillo. It uses a timer to break work into intervals,
-            traditionally 25 minutes in length (called &quot;pomodoros&quot;),
-            separated by short breaks.
-          </p>
-          <p className="text-black/90">
-            This technique improves productivity by encouraging focused work
-            sessions followed by regular breaks to promote sustained
-            concentration and prevent mental fatigue.
-          </p>
-        </div>
+  return (
+    <div className="flex flex-col w-full mx-auto">
+      <div className="flex justify-end mb-4 mt-2">
+        <FocusMode onChange={setFocusModeActive} />
       </div>
 
-      <TaskList />
+      {focusModeActive ? (
+        <div className="flex justify-center items-center py-6 sm:py-10">
+          <div className="w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto">
+            <Timer focusMode={true} />
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          <div className="flex flex-col gap-6 sm:gap-8 md:pr-4">
+            <div className="w-full max-w-sm sm:max-w-md mx-auto md:mx-0">
+              <Timer />
+            </div>
+            <div className="w-full max-w-sm sm:max-w-md mx-auto md:mx-0">
+              <PomodoroExplanation />
+            </div>
+          </div>
+
+          <div className="w-full max-w-xl mx-auto md:mx-0">
+            <TaskList />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

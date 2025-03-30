@@ -11,10 +11,10 @@ export default async function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col items-center rounded-xl justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900">PomoStudy</h1>
+          <h1 className="text-3xl font-extrabold text-gray-900">PomoClock</h1>
           <p className="mt-2 text-sm text-gray-600">
             Create an account to track your productivity
           </p>
