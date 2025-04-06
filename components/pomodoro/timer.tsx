@@ -8,6 +8,7 @@ import {
 } from "@/lib/utils";
 import { TimerMode, useTimerStore } from "@/store/timer-store";
 import { useTaskStore } from "@/store/task-store";
+import { savePomodorSession } from "@/app/actions/pomodoro-actions";
 import { cn } from "@/lib/utils";
 
 interface TimerProps {
@@ -19,6 +20,7 @@ export function Timer({ focusMode = false }: TimerProps) {
     mode,
     timeLeft,
     isRunning,
+    pomodoroTime,
     setMode,
     startTimer,
     pauseTimer,
@@ -45,6 +47,14 @@ export function Timer({ focusMode = false }: TimerProps) {
         if (activeTask) {
           incrementCompletedPomodoros(activeTask.id);
         }
+
+        // Save the completed pomodoro session to Supabase
+        const durationInSeconds = pomodoroTime;
+        savePomodorSession({
+          duration: durationInSeconds,
+          completed_at: new Date(),
+        });
+
         completePomo();
         playAlarmSound();
       } else {
@@ -61,6 +71,7 @@ export function Timer({ focusMode = false }: TimerProps) {
     isRunning,
     timeLeft,
     mode,
+    pomodoroTime,
     tick,
     completePomo,
     setMode,
@@ -72,12 +83,18 @@ export function Timer({ focusMode = false }: TimerProps) {
     if (isRunning) {
       pauseTimer();
     } else {
+      playClickSound();
       startTimer();
     }
   }
 
   function playAlarmSound() {
-    const audio = new Audio("/alarm.mp3");
+    const audio = new Audio("/click.mp3");
+    audio.play();
+  }
+
+  function playClickSound() {
+    const audio = new Audio("/click.mp3");
     audio.play();
   }
 

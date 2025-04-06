@@ -6,6 +6,18 @@ import {
   resendConfirmationEmail,
 } from "../../app/actions/auth-actions";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ConfirmationResponse {
   message: string;
@@ -73,86 +85,92 @@ export function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-      <h2 className="text-2xl font-bold mb-6 text-center dark:text-black">
-        Log in
-      </h2>
+    <Card className="w-full">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-semibold text-center">
+          Login
+        </CardTitle>
+        <CardDescription className="text-center">
+          Enter your email below to login to your account
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>
+              {error}
+              {isEmailNotConfirmed && (
+                <div className="mt-2">
+                  <Button
+                    variant="link"
+                    onClick={handleResendConfirmation}
+                    disabled={isResendingEmail}
+                    className="text-blue-600 dark:text-blue-400 p-0 h-auto font-medium"
+                  >
+                    {isResendingEmail
+                      ? "Sending..."
+                      : "Resend confirmation email"}
+                  </Button>
+                </div>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
-          {error}
-          {isEmailNotConfirmed && (
-            <div className="mt-2">
-              <button
-                onClick={handleResendConfirmation}
-                disabled={isResendingEmail}
-                className="text-blue-600 hover:underline font-medium"
+        {resendMessage && (
+          <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-600 dark:text-green-400">
+            <AlertDescription>{resendMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-muted-foreground hover:underline"
               >
-                {isResendingEmail ? "Sending..." : "Resend confirmation email"}
-              </button>
+                Forgot your password?
+              </Link>
             </div>
-          )}
-        </div>
-      )}
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-      {resendMessage && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 rounded-md">
-          {resendMessage}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        <div className="mb-6">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-pomodoro hover:bg-pomodoro-darker text-white font-medium py-2 px-4 rounded-md transition-colors"
-        >
-          {isLoading ? "Logging in..." : "Log in"}
-        </button>
-      </form>
-
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? "Logging in..." : "Login"}
+          </Button>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <div className="w-full text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-blue-600 hover:underline">
+          <Link
+            href="/signup"
+            className="text-primary hover:underline font-medium"
+          >
             Sign up
           </Link>
-        </p>
-      </div>
-    </div>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }

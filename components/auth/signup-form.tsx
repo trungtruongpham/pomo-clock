@@ -62,27 +62,34 @@ export function SignupForm() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-      <h2 className="text-2xl font-bold mb-6 text-center">Sign up</h2>
+    <div className="w-full space-y-6 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-8 shadow-xl">
+      <div className="space-y-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight text-black dark:text-white">
+          Sign up
+        </h1>
+        <p className="text-sm text-black dark:text-gray-400">
+          Create an account to track your productivity
+        </p>
+      </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
+        <div className="p-3 text-sm bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-md">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 rounded-md">
+        <div className="p-3 text-sm bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 rounded-md">
           {success}
         </div>
       )}
 
       {!success ? (
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Email
             </label>
@@ -91,15 +98,16 @@ export function SignupForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black px-3 py-2 text-sm text-gray-900 dark:text-white ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="you@example.com"
               required
             />
           </div>
 
-          <div className="mb-4">
+          <div className="space-y-2">
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Password
             </label>
@@ -108,15 +116,15 @@ export function SignupForm() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-700! bg-white dark:bg-black! px-3 py-2 text-sm text-gray-900 dark:text-white ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [-webkit-appearance:none] [appearance:none]"
               required
             />
           </div>
 
-          <div className="mb-6">
+          <div className="space-y-2">
             <label
               htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Confirm Password
             </label>
@@ -125,7 +133,7 @@ export function SignupForm() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-700! bg-white dark:bg-black! px-3 py-2 text-sm text-gray-900 dark:text-white ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [-webkit-appearance:none] [appearance:none]"
               required
             />
           </div>
@@ -133,7 +141,7 @@ export function SignupForm() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-pomodoro hover:bg-pomodoro-darker text-white font-medium py-2 px-4 rounded-md transition-colors"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"
           >
             {isLoading ? "Signing up..." : "Sign up"}
           </button>
@@ -142,20 +150,21 @@ export function SignupForm() {
         <div className="text-center mt-4">
           <button
             onClick={() => router.push("/login")}
-            className="text-blue-600 hover:underline"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium text-black dark:text-white hover:underline"
           >
             Go to login
           </button>
         </div>
       )}
 
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline">
-            Log in
-          </Link>
-        </p>
+      <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+        Already have an account?{" "}
+        <Link
+          href="/login"
+          className="text-black dark:text-white hover:underline font-medium"
+        >
+          Log in
+        </Link>
       </div>
     </div>
   );

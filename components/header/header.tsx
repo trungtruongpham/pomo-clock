@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, ChartLine } from "lucide-react";
 import { SettingsModal } from "../settings/settings-modal";
 
 export default function Header({ initialUser }: { initialUser: User | null }) {
@@ -138,6 +138,16 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
                 <Button
                   variant="ghost"
                   size="sm"
+                  asChild
+                  className="transition-colors"
+                >
+                  <Link href="/focus-leaders">Leaders</Link>
+                </Button>
+              </li>
+              <li>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={handleOpenSettings}
                   className="transition-colors"
                 >
@@ -182,11 +192,11 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={handleOpenSettings}
+                        onClick={() => router.push("/dashboard")}
                         className="cursor-pointer"
                       >
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
+                        <ChartLine className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={handleLogout}
