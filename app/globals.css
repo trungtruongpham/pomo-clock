@@ -220,5 +220,6 @@ input[type="password"]::placeholder {
 
 /* Dark mode support */
 .dark input[type="password"] {
-  color: black !important;
+  background-color: black !important;
+  color: white !important;
 }

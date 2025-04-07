@@ -15,6 +15,9 @@ import {
   getStreakLeaders,
 } from "@/app/actions/pomodoro-actions";
 
+// Set revalidation time to 1 hour
+export const revalidate = 3600;
+
 export const metadata = {
   title: "Focus Leaders - PomoClock",
   description: "See who's been focusing the most with PomoClock",

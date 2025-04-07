@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { createClientSupabase } from "@/lib/supabase-client";
 
 interface ConfirmationResponse {
   message: string;
@@ -28,6 +29,7 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isResendingEmail, setIsResendingEmail] = useState(false);
   const [isEmailNotConfirmed, setIsEmailNotConfirmed] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
@@ -61,6 +63,29 @@ export function LoginForm() {
       console.error("Login error:", err);
       setError("An unexpected error occurred");
       setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    setError(null);
+    setIsGoogleLoading(true);
+
+    try {
+      const supabase = createClientSupabase();
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // The redirect happens automatically, no need to handle it here
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError("Failed to login with Google");
+      setIsGoogleLoading(false);
     }
   }
 
@@ -123,6 +148,19 @@ export function LoginForm() {
           </Alert>
         )}
 
+        <Button
+          variant="outline"
+          onClick={handleGoogleLogin}
+          disabled={isGoogleLoading}
+          className="w-full"
+        >
+          {isGoogleLoading ? "Connecting..." : "Continue with Google"}
+        </Button>
+
+        <div className="relative text-center">
+          <p className="text-sm text-muted-foreground my-2">or</p>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -156,7 +194,7 @@ export function LoginForm() {
           </div>
 
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? "Logging in..." : "Login"}
+            {isLoading ? "Logging in..." : "Login with Email"}
           </Button>
         </form>
       </CardContent>
