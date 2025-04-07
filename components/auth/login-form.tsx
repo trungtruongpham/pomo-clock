@@ -85,7 +85,7 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full dark:bg-black">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-semibold text-center">
           Login

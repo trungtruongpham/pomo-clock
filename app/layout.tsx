@@ -140,7 +140,7 @@ export default async function RootLayout({
   } = await supabase.auth.getUser();
 
   return (
-    <html lang="en" className="no-scrollbar">
+    <html lang="en" className="no-scrollbar" suppressHydrationWarning>
       <head>
         <link rel="canonical" href="https://pomostudy.app" />
       </head>

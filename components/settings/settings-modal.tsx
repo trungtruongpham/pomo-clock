@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTimerStore, TimerMode } from "../../store/timer-store";
-import { useThemeStore, Theme } from "../../store/theme-store";
-import { ThemeSelector } from "../theme/theme-selector";
+import { ThemeSelector, Theme } from "../theme/theme-selector";
+import { useTheme } from "next-themes";
 import { X } from "lucide-react";
 
 interface SettingsModalProps {
@@ -19,7 +19,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     longBreakInterval,
     setMode,
   } = useTimerStore();
-  const { theme, setTheme } = useThemeStore();
+
+  const { theme, setTheme } = useTheme();
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +30,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   );
   const [longBreakMinutes, setLongBreakMinutes] = useState(longBreakTime / 60);
   const [intervalCount, setIntervalCount] = useState(longBreakInterval);
-  const [selectedTheme, setSelectedTheme] = useState<Theme>(theme);
+  const [selectedTheme, setSelectedTheme] = useState<Theme>(
+    (theme as Theme) || "system"
+  );
 
   // Reset form values when modal opens
   useEffect(() => {
@@ -38,7 +41,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       setShortBreakMinutes(shortBreakTime / 60);
       setLongBreakMinutes(longBreakTime / 60);
       setIntervalCount(longBreakInterval);
-      setSelectedTheme(theme);
+      setSelectedTheme((theme as Theme) || "system");
     }
   }, [
     isOpen,

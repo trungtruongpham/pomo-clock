@@ -175,6 +175,8 @@ export async function getMinutesLeaders(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
       );
 
+    console.log(sessionsData);
+
     if (sessionsError) {
       console.error("Error fetching minutes leaders:", sessionsError);
       return {
