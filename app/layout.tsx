@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://pomostudy.app"
+    process.env.NEXT_PUBLIC_APP_URL || "https://pomoclock.com"
   ),
   title: {
     default: "PomoClock - Pomodoro Timer for Productive Study Sessions",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     "focus leaderboard",
     "productivity app",
   ],
-  authors: [{ name: "PomoClock", url: "https://pomostudy.app" }],
+  authors: [{ name: "PomoClock", url: "https://pomoclock.com" }],
   creator: "PomoClock",
   applicationName: "PomoClock",
   publisher: "PomoClock",
@@ -74,7 +74,7 @@ export const metadata: Metadata = {
       "Enhance your study sessions with this free online Pomodoro timer. Customize work/break intervals, track tasks, and improve focus with the Pomodoro technique.",
     siteName: "PomoClock",
     locale: "en_US",
-    url: "https://pomostudy.app",
+    url: "https://pomoclock.com",
     images: [
       {
         url: "/og-image.png",
@@ -92,8 +92,8 @@ export const metadata: Metadata = {
     description:
       "Boost your productivity with this free online Pomodoro timer for effective study sessions. Customizable work/break intervals and task tracking.",
     images: ["/og-image.png"],
-    creator: "@pomostudy",
-    site: "@pomostudy",
+    creator: "@pomoclock",
+    site: "@pomoclock",
   },
 
   icons: {
@@ -143,7 +143,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="no-scrollbar" suppressHydrationWarning>
       <head>
-        <link rel="canonical" href="https://pomostudy.app" />
+        <link rel="canonical" href="https://pomoclock.com" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen no-scrollbar`}

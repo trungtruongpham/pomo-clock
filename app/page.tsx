@@ -18,8 +18,8 @@ export default function Home() {
     },
     keywords:
       "pomodoro, pomodoro timer, pomodoro technique, pomodoro clock, pomodoro study",
-    screenshot: "https://pomostudy.app/og-image.png",
-    url: "https://pomostudy.app",
+    screenshot: "https://pomoclock.com/og-image.png",
+    url: "https://pomoclock.com",
   };
 
   return (

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { TaskList } from "@/components/tasks/task-list";
 import { Timer } from "./pomodoro/timer";
-import { PomodoroExplanation } from "./explanation-card";
 import { FocusMode } from "./focus-mode-switch";
 
 export function HomepageContent() {
@@ -11,7 +10,7 @@ export function HomepageContent() {
 
   return (
     <div
-      className={`flex flex-col w-full mx-auto ${
+      className={`flex flex-col w-full min-h-[calc(100vh-4rem)] justify-center mx-auto ${
         focusModeActive ? "overflow-hidden" : ""
       }`}
     >
@@ -40,9 +39,6 @@ export function HomepageContent() {
                 PomoClock - Pomodoro Timer for Productivity
               </h1>
               <Timer />
-            </div>
-            <div className="w-full max-w-sm sm:max-w-md mx-auto md:mx-0">
-              <PomodoroExplanation />
             </div>
           </section>
 

@@ -1,10 +1,29 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useTimerStore, TimerMode } from "../../store/timer-store";
 import { ThemeSelector, Theme } from "../theme/theme-selector";
 import { useTheme } from "next-themes";
-import { X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { useBackgroundSound } from "@/hooks/use-background-sound";
+import { Volume2, VolumeX } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -21,8 +40,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   } = useTimerStore();
 
   const { theme, setTheme } = useTheme();
-
-  const modalRef = useRef<HTMLDivElement>(null);
+  const { currentSound, setSound, volume, setVolume, isPlaying, togglePlay } =
+    useBackgroundSound();
 
   const [pomodoroMinutes, setPomodoroMinutes] = useState(pomodoroTime / 60);
   const [shortBreakMinutes, setShortBreakMinutes] = useState(
@@ -33,6 +52,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [selectedTheme, setSelectedTheme] = useState<Theme>(
     (theme as Theme) || "system"
   );
+  const [autoStartBreaks, setAutoStartBreaks] = useState(false);
 
   // Reset form values when modal opens
   useEffect(() => {
@@ -52,34 +72,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     theme,
   ]);
 
-  // Handle outside click to close modal
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        onClose();
-      }
-    }
-
-    // Add event listener when modal is open
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    // Cleanup event listener
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
   function handleSave() {
-    // Here we would update the timer store with new values
-    // For simplicity, we're just going to simulate a save action
     const timerStore = useTimerStore.getState();
 
-    // Update timer settings in state
     useTimerStore.setState({
       pomodoroTime: pomodoroMinutes * 60,
       shortBreakTime: shortBreakMinutes * 60,
@@ -87,140 +82,144 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       longBreakInterval: intervalCount,
     });
 
-    // Update theme setting
     setTheme(selectedTheme);
-
-    // Reset timer with new duration based on current mode
     setMode(timerStore.mode as TimerMode);
     onClose();
   }
 
-  if (!isOpen) return null;
+  function handleSoundChange(value: string) {
+    setSound(value as "rain" | "forest" | "coffee" | null);
+  }
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50"
-      onClick={onClose}
-    >
-      <div
-        ref={modalRef}
-        className="bg-background dark:bg-black border border-border dark:border-white/10 rounded-lg max-w-md w-full p-6 relative animate-in fade-in duration-200 shadow-lg dark:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-        onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from closing it
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-foreground/70 hover:text-foreground dark:text-white/60 dark:hover:text-white/90 transition-colors"
-        >
-          <X size={20} />
-        </button>
-
-        <h2 className="text-xl font-bold mb-6 text-foreground dark:text-white">
-          Settings
-        </h2>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+        </DialogHeader>
 
         <div className="space-y-6">
           <div>
-            <h3 className="font-medium mb-3 text-foreground dark:text-white/90">
-              Timer (minutes)
-            </h3>
+            <h3 className="font-medium mb-3">Timer (minutes)</h3>
             <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm text-foreground/70 dark:text-white/60 block mb-2">
-                  Pomodoro
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="pomodoro">Pomodoro</Label>
+                <Input
+                  id="pomodoro"
                   type="number"
                   min="1"
                   max="60"
                   value={pomodoroMinutes}
                   onChange={(e) => setPomodoroMinutes(Number(e.target.value))}
-                  className="w-full p-2 border border-border dark:border-white/10 bg-background dark:bg-black text-foreground dark:text-white rounded-md dark:focus:border-white/30 transition-colors"
                 />
               </div>
-              <div>
-                <label className="text-sm text-foreground/70 dark:text-white/60 block mb-2">
-                  Short Break
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="shortBreak">Short Break</Label>
+                <Input
+                  id="shortBreak"
                   type="number"
                   min="1"
                   max="30"
                   value={shortBreakMinutes}
                   onChange={(e) => setShortBreakMinutes(Number(e.target.value))}
-                  className="w-full p-2 border border-border dark:border-white/10 bg-background dark:bg-black text-foreground dark:text-white rounded-md dark:focus:border-white/30 transition-colors"
                 />
               </div>
-              <div>
-                <label className="text-sm text-foreground/70 dark:text-white/60 block mb-2">
-                  Long Break
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="longBreak">Long Break</Label>
+                <Input
+                  id="longBreak"
                   type="number"
                   min="1"
                   max="60"
                   value={longBreakMinutes}
                   onChange={(e) => setLongBreakMinutes(Number(e.target.value))}
-                  className="w-full p-2 border border-border dark:border-white/10 bg-background dark:bg-black text-foreground dark:text-white rounded-md dark:focus:border-white/30 transition-colors"
                 />
               </div>
             </div>
           </div>
 
-          <div>
-            <h3 className="font-medium mb-3 text-foreground dark:text-white/90">
-              Theme
-            </h3>
+          <div className="space-y-2">
+            <Label>Theme</Label>
             <ThemeSelector value={selectedTheme} onChange={setSelectedTheme} />
           </div>
 
-          <div>
-            <h3 className="font-medium mb-3 text-foreground dark:text-white/90">
-              Auto Start Breaks
-            </h3>
-            <label className="flex items-center">
-              <input type="checkbox" className="mr-2" />
-              <span className="text-foreground">Auto start next break?</span>
-            </label>
-          </div>
-
-          <div>
-            <h3 className="font-medium mb-3 text-foreground dark:text-white/90">
-              Long Break Interval
-            </h3>
-            <input
-              type="number"
-              min="1"
-              max="10"
-              value={intervalCount}
-              onChange={(e) => setIntervalCount(Number(e.target.value))}
-              className="w-24 p-2 border border-border dark:border-white/10 bg-background dark:bg-black text-foreground dark:text-white rounded-md dark:focus:border-white/30 transition-colors"
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="autoStart"
+              checked={autoStartBreaks}
+              onCheckedChange={(checked) =>
+                setAutoStartBreaks(checked as boolean)
+              }
             />
-            <span className="ml-2 text-sm text-foreground/70 dark:text-white/60">
-              pomodoros
-            </span>
+            <Label htmlFor="autoStart">Auto start next break?</Label>
           </div>
 
-          <div>
-            <h3 className="font-medium mb-3 text-foreground dark:text-white/90">
-              Alarm Sound
-            </h3>
-            <select className="w-full p-2 border border-border dark:border-white/10 bg-background dark:bg-black text-foreground dark:text-white rounded-md dark:focus:border-white/30 transition-colors">
-              <option>Kitchen Timer</option>
-              <option>Bell</option>
-              <option>Digital Alarm</option>
-            </select>
+          <div className="space-y-2">
+            <Label htmlFor="interval">Long Break Interval</Label>
+            <div className="flex items-center space-x-2">
+              <Input
+                id="interval"
+                type="number"
+                min="1"
+                max="10"
+                value={intervalCount}
+                onChange={(e) => setIntervalCount(Number(e.target.value))}
+                className="w-24"
+              />
+              <span className="text-sm text-muted-foreground">pomodoros</span>
+            </div>
           </div>
 
-          <div className="pt-4 flex justify-end">
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-primary text-primary-foreground dark:bg-white dark:text-black rounded-md hover:bg-primary/90 dark:hover:bg-white/90 transition-colors"
-            >
-              Save
-            </button>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="sound">Background Sound</Label>
+              <Select
+                value={currentSound || undefined}
+                onValueChange={handleSoundChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a background sound" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rain">Rain</SelectItem>
+                  <SelectItem value="forest">Forest</SelectItem>
+                  <SelectItem value="coffee">Coffee Shop</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {currentSound && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Volume</Label>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={togglePlay}
+                  >
+                    {isPlaying ? (
+                      <Volume2 className="h-4 w-4" />
+                    ) : (
+                      <VolumeX className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <Slider
+                  value={[volume * 100]}
+                  onValueChange={([value]) => setVolume(value / 100)}
+                  max={100}
+                  step={1}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end">
+            <Button onClick={handleSave}>Save</Button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

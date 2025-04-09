@@ -59,9 +59,10 @@ const OneTapComponent = () => {
         const { data, error } = await supabase.auth.getSession();
         if (error) {
           console.error("Error getting session", error);
+          return;
         }
         if (data.session) {
-          router.push("/");
+          // Don't show One Tap if user is already logged in
           return;
         }
 
@@ -78,8 +79,8 @@ const OneTapComponent = () => {
 
               if (error) throw error;
 
-              // redirect to protected page
-              router.push("/");
+              // Let the parent component handle navigation
+              // The auth state change will trigger the appropriate redirect
             } catch (error) {
               console.error("Error logging in with Google One Tap", error);
             }
