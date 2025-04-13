@@ -99,7 +99,8 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32" },
-      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
@@ -112,6 +113,16 @@ export const metadata: Metadata = {
         rel: "mask-icon",
         url: "/mask-icon.svg",
         color: "#DB524D",
+      },
+      {
+        rel: "icon",
+        type: "image/x-icon",
+        url: "/favicon.ico",
+      },
+      {
+        rel: "shortcut icon",
+        type: "image/x-icon",
+        url: "/favicon.ico",
       },
     ],
   },
@@ -144,6 +155,25 @@ export default async function RootLayout({
     <html lang="en" className="no-scrollbar" suppressHydrationWarning>
       <head>
         <link rel="canonical" href="https://pomoclock.com" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/icon-192.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="512x512"
+          href="/icon-512.png"
+        />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link
+          rel="apple-touch-icon-precomposed"
+          href="/apple-touch-icon-precomposed.png"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen no-scrollbar`}
