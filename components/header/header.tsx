@@ -23,7 +23,7 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { Button } from "../ui/button";
-import { LogOut, ChartLine, Info, Menu } from "lucide-react";
+import { LogOut, ChartLine, Menu } from "lucide-react";
 import { SettingsModal } from "../settings/settings-modal";
 
 export default function Header({ initialUser }: { initialUser: User | null }) {
