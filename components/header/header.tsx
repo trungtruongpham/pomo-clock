@@ -15,8 +15,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../ui/sheet";
 import { Button } from "../ui/button";
-import { LogOut, ChartLine, Info } from "lucide-react";
+import { LogOut, ChartLine, Info, Menu } from "lucide-react";
 import { SettingsModal } from "../settings/settings-modal";
 
 export default function Header({ initialUser }: { initialUser: User | null }) {
@@ -119,6 +126,86 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
     ? userDisplayName.charAt(0).toUpperCase()
     : "U";
 
+  const NavItems = () => (
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="transition-colors hover:cursor-pointer"
+      >
+        <Link href="/about">About</Link>
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="transition-colors hover:cursor-pointer"
+      >
+        <Link href="/focus-leaders">Leaderboard</Link>
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleOpenSettings}
+        className="transition-colors hover:cursor-pointer"
+      >
+        Settings
+      </Button>
+    </>
+  );
+
+  const UserMenu = () => {
+    if (isLoading) return <span className="">Loading...</span>;
+    if (!user) {
+      return (
+        <Button asChild variant="outline" size="sm">
+          <Link href="/login">Login</Link>
+        </Button>
+      );
+    }
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarImage
+                src={user.user_metadata?.avatar_url}
+                alt={userDisplayName || ""}
+              />
+              <AvatarFallback>{avatarFallback}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">
+                {shortUserDisplay}
+              </p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user.email}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => router.push("/dashboard")}
+            className="cursor-pointer"
+          >
+            <ChartLine className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
   return (
     <>
       <header
@@ -132,104 +219,38 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
           <Link href={"/"}>
             <h1 className="text-2xl font-bold">PomoClock</h1>
           </Link>
-          <nav>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:block">
             <ul className="flex space-x-6 items-center">
               <li>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="transition-colors hover:cursor-pointer"
-                >
-                  <Link href="/about">
-                    <Info className="h-4 w-4 mr-2" />
-                    About
-                  </Link>
-                </Button>
+                <NavItems />
               </li>
               <li>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="transition-colors hover:cursor-pointer"
-                >
-                  <Link href="/focus-leaders">Leaderboard</Link>
-                </Button>
+                <UserMenu />
               </li>
-              <li>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleOpenSettings}
-                  className="transition-colors hover:cursor-pointer"
-                >
-                  Settings
-                </Button>
-              </li>
-              {isLoading ? (
-                <li>
-                  <span className="">Loading...</span>
-                </li>
-              ) : user ? (
-                <li>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="relative h-8 w-8 rounded-full"
-                      >
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={user.user_metadata?.avatar_url}
-                            alt={userDisplayName || ""}
-                          />
-                          <AvatarFallback>{avatarFallback}</AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-56"
-                      align="end"
-                      forceMount
-                    >
-                      <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {shortUserDisplay}
-                          </p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {user.email}
-                          </p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => router.push("/dashboard")}
-                        className="cursor-pointer"
-                      >
-                        <ChartLine className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={handleLogout}
-                        className="cursor-pointer"
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log out</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </li>
-              ) : (
-                <li>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/login">Login</Link>
-                  </Button>
-                </li>
-              )}
             </ul>
           </nav>
+
+          {/* Mobile Navigation */}
+          <div className="flex items-center md:hidden">
+            <UserMenu />
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="ml-2">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col space-y-4 mt-6">
+                  <NavItems />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
 
