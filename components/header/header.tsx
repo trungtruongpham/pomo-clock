@@ -23,72 +23,64 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { Button } from "../ui/button";
-import { LogOut, ChartLine, Menu } from "lucide-react";
+import {
+  LogOut,
+  ChartLine,
+  Menu,
+  Info,
+  Trophy,
+  Settings,
+  Timer,
+} from "lucide-react";
 import { SettingsModal } from "../settings/settings-modal";
+import { cn } from "@/lib/utils";
 
 export default function Header({ initialUser }: { initialUser: User | null }) {
   const [user, setUser] = useState<User | null>(initialUser);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
+
+  // Sync with initialUser prop when it changes (e.g., after server-side auth)
+  useEffect(() => {
+    setUser(initialUser);
+  }, [initialUser]);
 
   useEffect(() => {
     const supabase = createClientSupabase();
 
-    // Initial check for session
-    supabase.auth.getSession().then(({ data }) => {
-      const session = data.session;
-      setUser(session?.user || null);
-      setIsLoading(false);
-
-      if (process.env.NODE_ENV !== "production") {
-        console.log("Initial session check:", {
-          hasSession: !!session,
-          user: session?.user,
-        });
-      }
-    });
-
-    // Set up auth state change listener
+    // Only listen for auth state changes, don't call getSession()
+    // The server already provided initialUser, so we trust that
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
-        if (process.env.NODE_ENV !== "production") {
-          console.log("Auth state changed:", event, {
-            hasSession: !!session,
-            user: session?.user,
-          });
+        // Only update on actual auth events, not INITIAL_SESSION
+        if (event !== "INITIAL_SESSION") {
+          if (process.env.NODE_ENV !== "production") {
+            console.log("Auth state changed:", event);
+          }
+          setUser(session?.user || null);
         }
-
-        setUser(session?.user || null);
-        setIsLoading(false);
       }
     );
 
-    // Handle scroll events for header transparency effect
     const handleScroll = () => {
-      const offset = window.scrollY;
-      if (offset > 10) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > 10);
     };
 
-    // Listen for custom events
     const handleOpenSettings = () => setIsSettingsOpen(true);
     window.addEventListener("open-settings", handleOpenSettings);
     window.addEventListener("scroll", handleScroll);
 
-    // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe();
       window.removeEventListener("open-settings", handleOpenSettings);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [initialUser]);
+  }, []);
 
   async function handleLogout() {
     try {
@@ -106,61 +98,82 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
 
   function handleOpenSettings() {
     setIsSettingsOpen(true);
+    setMobileMenuOpen(false);
   }
 
   function handleCloseSettings() {
     setIsSettingsOpen(false);
   }
 
-  // Get user display name (use name if available, otherwise email)
   const userDisplayName = user?.user_metadata?.name || user?.email;
-  // Shorten email if needed for display
   const shortUserDisplay = userDisplayName
     ? userDisplayName.length > 16
       ? userDisplayName.substring(0, 13) + "..."
       : userDisplayName
     : "";
-
-  // Get first letter of name/email for avatar fallback
   const avatarFallback = userDisplayName
     ? userDisplayName.charAt(0).toUpperCase()
     : "U";
 
-  const NavItems = () => (
-    <>
-      <Button
-        variant="ghost"
-        size="sm"
-        asChild
-        className="transition-colors hover:cursor-pointer"
-      >
-        <Link href="/about">About</Link>
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        asChild
-        className="transition-colors hover:cursor-pointer"
-      >
-        <Link href="/focus-leaders">Leaderboard</Link>
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleOpenSettings}
-        className="transition-colors hover:cursor-pointer"
-      >
-        Settings
-      </Button>
-    </>
+  const navItems = [
+    { href: "/focus-leaders", label: "Leaderboard", icon: Trophy },
+  ];
+
+  const NavLink = ({
+    href,
+    label,
+    icon: Icon,
+    onClick,
+  }: {
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    onClick?: () => void;
+  }) => (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium",
+        "text-muted-foreground hover:text-foreground",
+        "hover:bg-accent/50 transition-all duration-200",
+        "cursor-pointer"
+      )}
+    >
+      <Icon className="w-4 h-4" />
+      <span>{label}</span>
+    </Link>
+  );
+
+  const SettingsButton = ({ mobile = false }: { mobile?: boolean }) => (
+    <button
+      onClick={handleOpenSettings}
+      className={cn(
+        "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium",
+        "text-muted-foreground hover:text-foreground",
+        "hover:bg-accent/50 transition-all duration-200",
+        "cursor-pointer",
+        mobile && "w-full"
+      )}
+    >
+      <Settings className="w-4 h-4" />
+      <span>Settings</span>
+    </button>
   );
 
   const UserMenu = () => {
-    if (isLoading) return <span className="">Loading...</span>;
+    if (isLoading) {
+      return <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />;
+    }
+
     if (!user) {
       return (
-        <Button asChild variant="outline" size="sm">
-          <Link href="/login">Login</Link>
+        <Button
+          asChild
+          size="sm"
+          className="bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white border-0 shadow-lg shadow-rose-500/25"
+        >
+          <Link href="/login">Sign In</Link>
         </Button>
       );
     }
@@ -168,20 +181,25 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-8 w-8">
+          <Button
+            variant="ghost"
+            className="relative h-9 w-9 rounded-full ring-2 ring-border hover:ring-primary/50 transition-all duration-200"
+          >
+            <Avatar className="h-9 w-9">
               <AvatarImage
                 src={user.user_metadata?.avatar_url}
-                alt={userDisplayName || ""}
+                alt={userDisplayName || "User avatar"}
               />
-              <AvatarFallback>{avatarFallback}</AvatarFallback>
+              <AvatarFallback className="bg-gradient-to-br from-rose-500 to-red-500 text-white font-semibold">
+                {avatarFallback}
+              </AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuContent className="w-56 mt-2" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">
+              <p className="text-sm font-semibold leading-none">
                 {shortUserDisplay}
               </p>
               <p className="text-xs leading-none text-muted-foreground">
@@ -192,13 +210,17 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => router.push("/dashboard")}
-            className="cursor-pointer"
+            className="cursor-pointer gap-2"
           >
-            <ChartLine className="mr-2 h-4 w-4" />
+            <ChartLine className="h-4 w-4" />
             <span>Dashboard</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-            <LogOut className="mr-2 h-4 w-4" />
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={handleLogout}
+            className="cursor-pointer gap-2 text-destructive focus:text-destructive"
+          >
+            <LogOut className="h-4 w-4" />
             <span>Log out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -208,45 +230,135 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
 
   return (
     <>
+      {/* Floating Header */}
       <header
-        className={`py-4 border-b fixed top-0 left-0 right-0 w-full z-50 transition-all duration-200 ${
-          scrolled
-            ? "bg-background/80 backdrop-blur-md shadow-sm"
-            : "bg-background"
-        }`}
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50",
+          "px-4 sm:px-6 lg:px-8 py-3",
+          "transition-all duration-300 ease-out"
+        )}
       >
-        <div className="max-w-5xl mx-auto w-full flex justify-between items-center px-4 sm:px-6 lg:px-8">
-          <Link href={"/"}>
-            <h1 className="text-2xl font-bold">PomoClock</h1>
+        <div
+          className={cn(
+            "max-w-5xl mx-auto",
+            "flex items-center justify-between",
+            "px-4 py-2 rounded-2xl",
+            "border border-border/50",
+            "transition-all duration-300",
+            scrolled
+              ? "bg-background/80 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-black/20"
+              : "bg-background/60 backdrop-blur-md"
+          )}
+        >
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 group cursor-pointer"
+          >
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-red-500 shadow-lg shadow-rose-500/25 group-hover:shadow-rose-500/40 transition-shadow duration-200">
+              <Timer className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+              PomoClock
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:block">
-            <ul className="flex space-x-6 items-center">
-              <li>
-                <NavItems />
-              </li>
-              <li>
-                <UserMenu />
-              </li>
-            </ul>
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                icon={item.icon}
+              />
+            ))}
+            <SettingsButton />
+            <NavLink href="/about" label="About" icon={Info} />
+
+            <div className="w-px h-6 bg-border mx-2" />
+
+            <UserMenu />
           </nav>
 
           {/* Mobile Navigation */}
-          <div className="flex items-center md:hidden">
+          <div className="flex items-center gap-2 md:hidden">
             <UserMenu />
-            <Sheet>
+
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="ml-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-lg hover:bg-accent/50"
+                >
                   <Menu className="h-5 w-5" />
+                  <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
-                <SheetHeader>
-                  <SheetTitle>Menu</SheetTitle>
+              <SheetContent side="right" className="w-[300px] sm:w-[360px]">
+                <SheetHeader className="text-left">
+                  <SheetTitle className="flex items-center gap-2">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-red-500">
+                      <Timer className="w-4 h-4 text-white" />
+                    </div>
+                    PomoClock
+                  </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col space-y-4 mt-6">
-                  <NavItems />
+
+                <div className="flex flex-col gap-2 mt-8">
+                  {navItems.map((item) => (
+                    <NavLink
+                      key={item.href}
+                      href={item.href}
+                      label={item.label}
+                      icon={item.icon}
+                      onClick={() => setMobileMenuOpen(false)}
+                    />
+                  ))}
+                  <SettingsButton mobile />
+                  <NavLink
+                    href="/about"
+                    label="About"
+                    icon={Info}
+                    onClick={() => setMobileMenuOpen(false)}
+                  />
+
+                  {user && (
+                    <>
+                      <div className="h-px bg-border my-4" />
+
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium",
+                          "text-muted-foreground hover:text-foreground",
+                          "hover:bg-accent/50 transition-all duration-200",
+                          "cursor-pointer"
+                        )}
+                      >
+                        <ChartLine className="w-4 h-4" />
+                        <span>Dashboard</span>
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setMobileMenuOpen(false);
+                        }}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium",
+                          "text-destructive hover:text-destructive",
+                          "hover:bg-destructive/10 transition-all duration-200",
+                          "cursor-pointer"
+                        )}
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Log out</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
@@ -254,8 +366,8 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
         </div>
       </header>
 
-      {/* Add spacing div to prevent content from being hidden behind fixed header */}
-      <div className="h-[60px] sm:h-[64px]"></div>
+      {/* Spacer for fixed header */}
+      <div className="h-[72px] sm:h-[76px]" />
 
       {/* Settings Modal */}
       <SettingsModal isOpen={isSettingsOpen} onClose={handleCloseSettings} />

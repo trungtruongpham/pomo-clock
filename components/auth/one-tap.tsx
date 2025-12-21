@@ -1,7 +1,6 @@
 "use client";
 
 import Script from "next/script";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { createClientSupabase } from "@/lib/supabase-client";
 
@@ -30,7 +29,6 @@ declare global {
 
 const OneTapComponent = () => {
   const supabase = createClientSupabase();
-  const router = useRouter();
 
   // generate nonce to use for google id token sign-in
   const generateNonce = async (): Promise<string[]> => {
@@ -49,52 +47,61 @@ const OneTapComponent = () => {
   };
 
   useEffect(() => {
-    const initializeGoogleOneTap = () => {
+    let isSubscribed = true;
+
+    const initializeGoogleOneTap = async () => {
       console.log("Initializing Google One Tap");
-      window.addEventListener("load", async () => {
-        const [nonce, hashedNonce] = await generateNonce();
-        console.log("Nonce: ", nonce, hashedNonce);
 
-        // check if there's already an existing session before initializing the one-tap UI
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Error getting session", error);
-          return;
+      // Wait for google script to load
+      if (!window.google?.accounts?.id) {
+        return;
+      }
+
+      const [nonce, hashedNonce] = await generateNonce();
+
+      // Use onAuthStateChange to check session instead of getSession
+      // This avoids unnecessary cookie writes
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "INITIAL_SESSION" && !session && isSubscribed) {
+          // No session exists, initialize One Tap
+          window.google.accounts.id.initialize({
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
+            callback: async (response: CredentialResponse) => {
+              try {
+                const { error } = await supabase.auth.signInWithIdToken({
+                  provider: "google",
+                  token: response.credential,
+                  nonce,
+                });
+
+                if (error) throw error;
+
+                // Redirect after successful login
+                window.location.href = "/";
+              } catch (error) {
+                console.error("Error logging in with Google One Tap", error);
+              }
+            },
+            nonce: hashedNonce,
+            use_fedcm_for_prompt: true,
+          });
+          window.google.accounts.id.prompt();
         }
-        if (data.session) {
-          // Don't show One Tap if user is already logged in
-          return;
-        }
-
-        window.google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
-          callback: async (response: CredentialResponse) => {
-            try {
-              // send id token returned in response.credential to supabase
-              const { error } = await supabase.auth.signInWithIdToken({
-                provider: "google",
-                token: response.credential,
-                nonce,
-              });
-
-              if (error) throw error;
-
-              // Let the parent component handle navigation
-              // The auth state change will trigger the appropriate redirect
-            } catch (error) {
-              console.error("Error logging in with Google One Tap", error);
-            }
-          },
-          nonce: hashedNonce,
-          // with chrome's removal of third-party cookies, we need to use FedCM instead
-          use_fedcm_for_prompt: true,
-        });
-        window.google.accounts.id.prompt(); // Display the One Tap UI
+        // Unsubscribe after initial check
+        subscription.unsubscribe();
       });
     };
-    initializeGoogleOneTap();
-    return () => window.removeEventListener("load", initializeGoogleOneTap);
-  }, [router, supabase.auth]);
+
+    // Use a small delay to ensure the Google script is loaded
+    const timeoutId = setTimeout(initializeGoogleOneTap, 500);
+
+    return () => {
+      isSubscribed = false;
+      clearTimeout(timeoutId);
+    };
+  }, [supabase.auth]);
 
   return (
     <>
