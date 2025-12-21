@@ -8,7 +8,6 @@ import {
   PenTool,
   Palette,
   Calendar,
-  ChevronRight,
 } from "lucide-react"
 import { PRESET_TARGETS, Target } from "@/store/target-store"
 import { cn } from "@/lib/utils"

@@ -4,7 +4,6 @@ import { motion } from "framer-motion"
 import { X, RotateCcw, Trophy, Flame } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Milestone, useMilestoneStore } from "@/store/milestone-store"
-import { ProgressRing } from "./progress-ring"
 import { cn } from "@/lib/utils"
 
 interface ActiveSessionProps {

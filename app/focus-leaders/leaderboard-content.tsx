@@ -149,7 +149,7 @@ export function LeaderboardContent({
         transition={{ delay: 0.2 }}
         className="grid grid-cols-3 gap-4 mb-8"
       >
-        {TABS.map((tab, index) => {
+        {TABS.map((tab) => {
           const Icon = tab.icon;
           const data =
             tab.id === "minutes"

@@ -37,7 +37,6 @@ import { cn } from "@/lib/utils";
 
 export default function Header({ initialUser }: { initialUser: User | null }) {
   const [user, setUser] = useState<User | null>(initialUser);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -162,10 +161,6 @@ export default function Header({ initialUser }: { initialUser: User | null }) {
   );
 
   const UserMenu = () => {
-    if (isLoading) {
-      return <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />;
-    }
-
     if (!user) {
       return (
         <Button

@@ -125,7 +125,7 @@ export function DashboardContent() {
     const sessionDates = new Set(sessions.map((s) => s.date))
     
     let streak = 0
-    let currentDate = new Date()
+    const currentDate = new Date()
     
     // Check if today has sessions, if not start from yesterday
     if (!sessionDates.has(today)) {

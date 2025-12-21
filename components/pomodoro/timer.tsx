@@ -2,11 +2,7 @@
 
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  formatTime,
-  getTimerBackground,
-  getTimerDarkerBackground,
-} from "@/lib/utils";
+import { formatTime } from "@/lib/utils";
 import { TimerMode, useTimerStore } from "@/store/timer-store";
 import { useTargetStore } from "@/store/target-store";
 import { savePomodorSession } from "@/app/actions/pomodoro-actions";

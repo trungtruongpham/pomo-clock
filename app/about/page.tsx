@@ -12,9 +12,6 @@ import {
   Zap,
   Heart,
   MessageCircle,
-  Send,
-  User,
-  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
