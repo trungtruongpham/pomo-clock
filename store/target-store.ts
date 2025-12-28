@@ -7,6 +7,7 @@ export interface Target {
   description: string
   icon: string
   color: string
+  isCustom?: boolean
 }
 
 // Preset targets for common focus activities
@@ -60,12 +61,18 @@ interface TargetState {
   completedPomodoros: number
   sessionStartTime: Date | null
   totalFocusMinutes: number
+  customTargets: Target[]
 
   // Actions
   setTarget: (target: Target) => void
   incrementCompleted: () => void
   clearTarget: () => void
   addFocusMinutes: (minutes: number) => void
+  setCompletedPomodoros: (count: number) => void
+  setTotalFocusMinutes: (minutes: number) => void
+  addCustomTarget: (target: Target) => void
+  removeCustomTarget: (targetId: string) => void
+  setCustomTargets: (targets: Target[]) => void
 }
 
 export const useTargetStore = create<TargetState>()(
@@ -75,11 +82,13 @@ export const useTargetStore = create<TargetState>()(
       completedPomodoros: 0,
       sessionStartTime: null,
       totalFocusMinutes: 0,
+      customTargets: [],
 
       setTarget: (target) =>
         set({
           activeTarget: target,
           completedPomodoros: 0,
+          totalFocusMinutes: 0,
           sessionStartTime: new Date(),
         }),
 
@@ -92,6 +101,7 @@ export const useTargetStore = create<TargetState>()(
         set({
           activeTarget: null,
           completedPomodoros: 0,
+          totalFocusMinutes: 0,
           sessionStartTime: null,
         }),
 
@@ -99,6 +109,31 @@ export const useTargetStore = create<TargetState>()(
         set((state) => ({
           totalFocusMinutes: state.totalFocusMinutes + minutes,
         })),
+
+      setCompletedPomodoros: (count) =>
+        set({
+          completedPomodoros: count,
+        }),
+
+      setTotalFocusMinutes: (minutes) =>
+        set({
+          totalFocusMinutes: minutes,
+        }),
+
+      addCustomTarget: (target) =>
+        set((state) => ({
+          customTargets: [...state.customTargets, { ...target, isCustom: true }],
+        })),
+
+      removeCustomTarget: (targetId) =>
+        set((state) => ({
+          customTargets: state.customTargets.filter((t) => t.id !== targetId),
+        })),
+
+      setCustomTargets: (targets) =>
+        set({
+          customTargets: targets.map((t) => ({ ...t, isCustom: true })),
+        }),
     }),
     {
       name: "pomostudy-target",

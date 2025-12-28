@@ -1,34 +1,75 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { AnimatePresence, motion } from "framer-motion"
-import { Timer } from "./pomodoro/timer"
-import { FocusMode } from "./focus-mode-switch"
-import { TargetSelector } from "./target/target-selector"
-import { ActiveTarget } from "./target/active-target"
-import { Target, useTargetStore } from "@/store/target-store"
+import { useState, useEffect, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Timer } from "./pomodoro/timer";
+import { FocusMode } from "./focus-mode-switch";
+import { TargetSelector } from "./target/target-selector";
+import { ActiveTarget } from "./target/active-target";
+import { Target, useTargetStore } from "@/store/target-store";
+import { getTodayTargetSession } from "@/app/actions/target-actions";
 
 export function HomepageContent() {
-  const [focusModeActive, setFocusModeActive] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  
-  const { 
-    activeTarget, 
-    completedPomodoros, 
+  const [focusModeActive, setFocusModeActive] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [dbSessionData, setDbSessionData] = useState<{
+    completedPomodoros: number;
+    totalFocusMinutes: number;
+  } | null>(null);
+
+  const {
+    activeTarget,
+    completedPomodoros: localCompletedPomodoros,
+    totalFocusMinutes: localTotalFocusMinutes,
     setTarget,
-    clearTarget 
-  } = useTargetStore()
+    clearTarget,
+    setCompletedPomodoros,
+    setTotalFocusMinutes,
+  } = useTargetStore();
+
+  // Fetch target session data from database when target changes
+  const fetchTargetSessionData = useCallback(
+    async (targetId: string) => {
+      const result = await getTodayTargetSession(targetId);
+      if (result.success && result.data) {
+        setDbSessionData({
+          completedPomodoros: result.data.completed_pomodoros,
+          totalFocusMinutes: result.data.total_focus_minutes,
+        });
+        // Sync with local store
+        setCompletedPomodoros(result.data.completed_pomodoros);
+        setTotalFocusMinutes(result.data.total_focus_minutes);
+      } else {
+        setDbSessionData(null);
+      }
+    },
+    [setCompletedPomodoros, setTotalFocusMinutes]
+  );
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
+
+  // Fetch data when active target changes
+  useEffect(() => {
+    if (activeTarget && mounted) {
+      fetchTargetSessionData(activeTarget.id);
+    }
+  }, [activeTarget, mounted, fetchTargetSessionData]);
+
+  // Calculate display values - prefer database data, fallback to local
+  const displayCompletedPomodoros =
+    dbSessionData?.completedPomodoros ?? localCompletedPomodoros;
+  const displayTotalFocusMinutes =
+    dbSessionData?.totalFocusMinutes ?? localTotalFocusMinutes;
 
   function handleTargetSelect(target: Target) {
-    setTarget(target)
+    setTarget(target);
   }
 
   function handleClearTarget() {
-    clearTarget()
+    clearTarget();
+    setDbSessionData(null);
   }
 
   // Prevent hydration mismatch
@@ -41,7 +82,7 @@ export function HomepageContent() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -81,7 +122,8 @@ export function HomepageContent() {
             {activeTarget && (
               <ActiveTarget
                 target={activeTarget}
-                completedPomodoros={completedPomodoros}
+                completedPomodoros={displayCompletedPomodoros}
+                totalFocusMinutes={displayTotalFocusMinutes}
                 onClear={handleClearTarget}
               />
             )}
@@ -91,7 +133,9 @@ export function HomepageContent() {
               className="w-full max-w-sm sm:max-w-md mx-auto"
               aria-label="Pomodoro Timer"
             >
-              <h1 className="sr-only">PomoClock - Pomodoro Timer for Productivity</h1>
+              <h1 className="sr-only">
+                PomoClock - Pomodoro Timer for Productivity
+              </h1>
               <Timer />
             </section>
 
@@ -108,5 +152,5 @@ export function HomepageContent() {
         </AnimatePresence>
       )}
     </div>
-  )
+  );
 }

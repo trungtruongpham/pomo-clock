@@ -6,6 +6,7 @@ import { formatTime } from "@/lib/utils";
 import { TimerMode, useTimerStore } from "@/store/timer-store";
 import { useTargetStore } from "@/store/target-store";
 import { savePomodorSession } from "@/app/actions/pomodoro-actions";
+import { saveTargetSession } from "@/app/actions/target-actions";
 import { cn } from "@/lib/utils";
 import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Sunset } from "lucide-react";
 
@@ -89,10 +90,21 @@ export function Timer({ focusMode = false }: TimerProps) {
     } else if (isRunning && timeLeft === 0) {
       // Timer completed
       if (mode === "pomodoro") {
-        // If there's an active target, increment completed count
+        const focusMinutes = pomodoroTime / 60;
+        
+        // If there's an active target, increment completed count and save to database
         if (activeTarget) {
           incrementCompleted();
-          addFocusMinutes(pomodoroTime / 60);
+          addFocusMinutes(focusMinutes);
+          
+          // Save target session to database
+          saveTargetSession({
+            target_id: activeTarget.id,
+            target_label: activeTarget.label,
+            target_icon: activeTarget.icon,
+            target_color: activeTarget.color,
+            focus_minutes: focusMinutes,
+          });
         }
 
         // Save the completed pomodoro session to Supabase

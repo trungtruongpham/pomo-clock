@@ -1,49 +1,86 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import {
   Clock,
-  Target,
+  Target as TargetIcon,
   Flame,
   TrendingUp,
   Calendar,
   ChartLine,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { getFocusSessions } from "@/app/actions/pomodoro-actions"
-import { PRESET_TARGETS } from "@/store/target-store"
-import { FocusChart } from "./focus-chart"
+  BookOpen,
+  Briefcase,
+  Code,
+  PenTool,
+  Palette,
+  Music,
+  Dumbbell,
+  Heart,
+  Lightbulb,
+  Gamepad2,
+  GraduationCap,
+  Camera,
+  Utensils,
+  Plane,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { getFocusSessions } from "@/app/actions/pomodoro-actions";
+import { PRESET_TARGETS, Target } from "@/store/target-store";
+import {
+  getCustomTargets,
+  getTargetSessionsByDateRange,
+} from "@/app/actions/target-actions";
+import { FocusChart } from "./focus-chart";
 
-type DateRange = "7days" | "30days" | "month" | "year"
+const TARGET_ICONS: Record<string, React.ReactNode> = {
+  BookOpen: <BookOpen className="w-3.5 h-3.5" />,
+  Briefcase: <Briefcase className="w-3.5 h-3.5" />,
+  Code: <Code className="w-3.5 h-3.5" />,
+  PenTool: <PenTool className="w-3.5 h-3.5" />,
+  Palette: <Palette className="w-3.5 h-3.5" />,
+  Calendar: <Calendar className="w-3.5 h-3.5" />,
+  Music: <Music className="w-3.5 h-3.5" />,
+  Dumbbell: <Dumbbell className="w-3.5 h-3.5" />,
+  Heart: <Heart className="w-3.5 h-3.5" />,
+  Lightbulb: <Lightbulb className="w-3.5 h-3.5" />,
+  Gamepad2: <Gamepad2 className="w-3.5 h-3.5" />,
+  GraduationCap: <GraduationCap className="w-3.5 h-3.5" />,
+  Camera: <Camera className="w-3.5 h-3.5" />,
+  Utensils: <Utensils className="w-3.5 h-3.5" />,
+  Plane: <Plane className="w-3.5 h-3.5" />,
+};
+
+type DateRangeType = "7days" | "30days" | "month" | "year";
 
 interface StatsData {
-  totalSessions: number
-  totalDuration: number
-  avgDailyDuration: number
-  currentStreak: number
-  bestDay: string
-  bestDayDuration: number
+  totalSessions: number;
+  totalDuration: number;
+  avgDailyDuration: number;
+  currentStreak: number;
+  bestDay: string;
+  bestDayDuration: number;
 }
 
 interface DailyData {
-  date: string
-  totalSessions: number
-  totalDuration: number
+  date: string;
+  totalSessions: number;
+  totalDuration: number;
 }
 
 const RANGE_OPTIONS = [
-  { label: "7 Days", value: "7days" as DateRange },
-  { label: "30 Days", value: "30days" as DateRange },
-  { label: "This Month", value: "month" as DateRange },
-  { label: "This Year", value: "year" as DateRange },
-]
+  { label: "7 Days", value: "7days" as DateRangeType },
+  { label: "30 Days", value: "30days" as DateRangeType },
+  { label: "This Month", value: "month" as DateRangeType },
+  { label: "This Year", value: "year" as DateRangeType },
+];
 
 export function DashboardContent() {
-  const [range, setRange] = useState<DateRange>("7days")
-  const [selectedTarget, setSelectedTarget] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [data, setData] = useState<DailyData[]>([])
+  const [range, setRange] = useState<DateRangeType>("7days");
+  const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DailyData[]>([]);
+  const [customTargets, setCustomTargets] = useState<Target[]>([]);
   const [stats, setStats] = useState<StatsData>({
     totalSessions: 0,
     totalDuration: 0,
@@ -51,113 +88,171 @@ export function DashboardContent() {
     currentStreak: 0,
     bestDay: "",
     bestDayDuration: 0,
-  })
+  });
+
+  // Fetch custom targets on mount
+  const fetchCustomTargets = useCallback(async () => {
+    const result = await getCustomTargets();
+    if (result.success && result.data) {
+      const targets = result.data.map((t) => ({
+        id: t.target_id,
+        label: t.label,
+        description: t.description || "Custom target",
+        icon: t.icon,
+        color: t.color,
+        isCustom: true,
+      }));
+      setCustomTargets(targets);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCustomTargets();
+  }, [fetchCustomTargets]);
+
+  // Combine preset and custom targets
+  const allTargets = [...PRESET_TARGETS, ...customTargets];
 
   useEffect(() => {
     async function fetchData() {
-      setLoading(true)
+      setLoading(true);
 
       // Calculate date range
-      const endDate = new Date()
-      let startDate = new Date()
+      const endDate = new Date();
+      let startDate = new Date();
 
       if (range === "7days") {
-        startDate.setDate(endDate.getDate() - 7)
+        startDate.setDate(endDate.getDate() - 7);
       } else if (range === "30days") {
-        startDate.setDate(endDate.getDate() - 30)
+        startDate.setDate(endDate.getDate() - 30);
       } else if (range === "month") {
-        startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1)
+        startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
       } else if (range === "year") {
-        startDate = new Date(endDate.getFullYear(), 0, 1)
+        startDate = new Date(endDate.getFullYear(), 0, 1);
       }
 
-      const result = await getFocusSessions({ startDate, endDate })
+      let sessions: DailyData[] = [];
 
-      if (result.success && result.data) {
-        const sessions = result.data
+      if (selectedTarget) {
+        // Fetch target-specific data from target_sessions table
+        const result = await getTargetSessionsByDateRange(startDate, endDate);
 
-        // Calculate stats
-        const totalSessions = sessions.reduce((sum, day) => sum + day.totalSessions, 0)
-        const totalDuration = sessions.reduce((sum, day) => sum + day.totalDuration, 0)
-        const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        if (result.success && result.data) {
+          // Filter by selected target and group by date
+          const filteredData = result.data.filter(
+            (s) => s.target_id === selectedTarget
+          );
 
-        // Find best day
-        let bestDay = ""
-        let bestDayDuration = 0
-        sessions.forEach((day) => {
-          if (day.totalDuration > bestDayDuration) {
-            bestDayDuration = day.totalDuration
-            bestDay = day.date
-          }
-        })
+          // Group by date
+          const sessionsByDay: Record<
+            string,
+            { totalSessions: number; totalDuration: number }
+          > = {};
 
-        setData(sessions)
-        setStats({
-          totalSessions,
-          totalDuration,
-          avgDailyDuration: totalDuration / daysDiff,
-          currentStreak: calculateStreak(sessions),
-          bestDay: bestDay ? formatDateShort(bestDay) : "N/A",
-          bestDayDuration,
-        })
+          filteredData.forEach((session) => {
+            const date = session.session_date;
+            if (!sessionsByDay[date]) {
+              sessionsByDay[date] = { totalSessions: 0, totalDuration: 0 };
+            }
+            sessionsByDay[date].totalSessions += session.completed_pomodoros;
+            sessionsByDay[date].totalDuration += session.total_focus_minutes;
+          });
+
+          sessions = Object.entries(sessionsByDay).map(([date, stats]) => ({
+            date,
+            totalSessions: stats.totalSessions,
+            totalDuration: Math.round(stats.totalDuration),
+          }));
+        }
       } else {
-        setData([])
-        setStats({
-          totalSessions: 0,
-          totalDuration: 0,
-          avgDailyDuration: 0,
-          currentStreak: 0,
-          bestDay: "N/A",
-          bestDayDuration: 0,
-        })
+        // Fetch all sessions when no target is selected
+        const result = await getFocusSessions({ startDate, endDate });
+
+        if (result.success && result.data) {
+          sessions = result.data;
+        }
       }
 
-      setLoading(false)
+      // Calculate stats
+      const totalSessions = sessions.reduce(
+        (sum, day) => sum + day.totalSessions,
+        0
+      );
+      const totalDuration = sessions.reduce(
+        (sum, day) => sum + day.totalDuration,
+        0
+      );
+      const daysDiff =
+        Math.ceil(
+          (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+        ) + 1;
+
+      // Find best day
+      let bestDay = "";
+      let bestDayDuration = 0;
+      sessions.forEach((day) => {
+        if (day.totalDuration > bestDayDuration) {
+          bestDayDuration = day.totalDuration;
+          bestDay = day.date;
+        }
+      });
+
+      setData(sessions);
+      setStats({
+        totalSessions,
+        totalDuration,
+        avgDailyDuration: totalDuration / daysDiff,
+        currentStreak: calculateStreak(sessions),
+        bestDay: bestDay ? formatDateShort(bestDay) : "N/A",
+        bestDayDuration,
+      });
+
+      setLoading(false);
     }
 
-    fetchData()
-  }, [range, selectedTarget])
+    fetchData();
+  }, [range, selectedTarget]);
 
   function calculateStreak(sessions: DailyData[]): number {
-    if (sessions.length === 0) return 0
-    
-    const today = new Date().toISOString().split("T")[0]
-    const sessionDates = new Set(sessions.map((s) => s.date))
-    
-    let streak = 0
-    const currentDate = new Date()
-    
+    if (sessions.length === 0) return 0;
+
+    const today = new Date().toISOString().split("T")[0];
+    const sessionDates = new Set(sessions.map((s) => s.date));
+
+    let streak = 0;
+    const currentDate = new Date();
+
     // Check if today has sessions, if not start from yesterday
     if (!sessionDates.has(today)) {
-      currentDate.setDate(currentDate.getDate() - 1)
+      currentDate.setDate(currentDate.getDate() - 1);
     }
-    
+
     while (true) {
-      const dateStr = currentDate.toISOString().split("T")[0]
+      const dateStr = currentDate.toISOString().split("T")[0];
       if (sessionDates.has(dateStr)) {
-        streak++
-        currentDate.setDate(currentDate.getDate() - 1)
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
       } else {
-        break
+        break;
       }
     }
-    
-    return streak
+
+    return streak;
   }
 
   function formatDuration(minutes: number): string {
-    const hours = Math.floor(minutes / 60)
-    const mins = Math.round(minutes % 60)
-    if (hours > 0) return `${hours}h ${mins}m`
-    return `${mins}m`
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins}m`;
   }
 
   function formatDateShort(dateStr: string): string {
-    const date = new Date(dateStr)
+    const date = new Date(dateStr);
     return new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "numeric",
-    }).format(date)
+    }).format(date);
   }
 
   const statCards = [
@@ -171,7 +266,7 @@ export function DashboardContent() {
     {
       label: "Sessions Completed",
       value: stats.totalSessions.toString(),
-      icon: Target,
+      icon: TargetIcon,
       color: "from-emerald-500 to-teal-500",
       bgColor: "bg-emerald-500/10",
     },
@@ -189,7 +284,7 @@ export function DashboardContent() {
       color: "from-blue-500 to-indigo-500",
       bgColor: "bg-blue-500/10",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen py-8 px-4">
@@ -318,18 +413,31 @@ export function DashboardContent() {
             >
               All Targets
             </button>
-            {PRESET_TARGETS.map((target) => (
+            {allTargets.map((target) => (
               <button
                 key={target.id}
                 onClick={() => setSelectedTarget(target.id)}
                 className={cn(
-                  "px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 cursor-pointer",
+                  "flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 cursor-pointer",
                   selectedTarget === target.id
                     ? `bg-gradient-to-r ${target.color} text-white`
                     : "bg-card border border-border hover:bg-accent/50 text-foreground"
                 )}
               >
-                {target.label}
+                {TARGET_ICONS[target.icon] || <BookOpen className="w-3.5 h-3.5" />}
+                <span>{target.label}</span>
+                {target.isCustom && (
+                  <span
+                    className={cn(
+                      "text-[10px] px-1 py-0.5 rounded-sm font-medium",
+                      selectedTarget === target.id
+                        ? "bg-white/20 text-white"
+                        : "bg-violet-500/10 text-violet-500"
+                    )}
+                  >
+                    Custom
+                  </span>
+                )}
               </button>
             ))}
           </div>

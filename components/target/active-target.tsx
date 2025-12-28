@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
 import {
   X,
   BookOpen,
@@ -11,15 +11,25 @@ import {
   Calendar,
   Flame,
   Clock,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Target } from "@/store/target-store"
-import { cn } from "@/lib/utils"
+  Music,
+  Dumbbell,
+  Heart,
+  Lightbulb,
+  Gamepad2,
+  GraduationCap,
+  Camera,
+  Utensils,
+  Plane,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Target } from "@/store/target-store";
+import { cn } from "@/lib/utils";
 
 interface ActiveTargetProps {
-  target: Target
-  completedPomodoros: number
-  onClear: () => void
+  target: Target;
+  completedPomodoros: number;
+  totalFocusMinutes: number;
+  onClear: () => void;
 }
 
 const TARGET_ICONS: Record<string, React.ReactNode> = {
@@ -29,12 +39,25 @@ const TARGET_ICONS: Record<string, React.ReactNode> = {
   PenTool: <PenTool className="w-5 h-5" />,
   Palette: <Palette className="w-5 h-5" />,
   Calendar: <Calendar className="w-5 h-5" />,
-}
+  Music: <Music className="w-5 h-5" />,
+  Dumbbell: <Dumbbell className="w-5 h-5" />,
+  Heart: <Heart className="w-5 h-5" />,
+  Lightbulb: <Lightbulb className="w-5 h-5" />,
+  Gamepad2: <Gamepad2 className="w-5 h-5" />,
+  GraduationCap: <GraduationCap className="w-5 h-5" />,
+  Camera: <Camera className="w-5 h-5" />,
+  Utensils: <Utensils className="w-5 h-5" />,
+  Plane: <Plane className="w-5 h-5" />,
+};
 
-export function ActiveTarget({ target, completedPomodoros, onClear }: ActiveTargetProps) {
-  const focusMinutes = completedPomodoros * 25
-  const focusHours = Math.floor(focusMinutes / 60)
-  const remainingMinutes = focusMinutes % 60
+export function ActiveTarget({
+  target,
+  completedPomodoros,
+  totalFocusMinutes,
+  onClear,
+}: ActiveTargetProps) {
+  const focusHours = Math.floor(totalFocusMinutes / 60);
+  const remainingMinutes = Math.round(totalFocusMinutes % 60);
 
   return (
     <motion.div
@@ -56,7 +79,7 @@ export function ActiveTarget({ target, completedPomodoros, onClear }: ActiveTarg
             target.color
           )}
         >
-          {TARGET_ICONS[target.icon]}
+          {TARGET_ICONS[target.icon] || <BookOpen className="w-5 h-5" />}
         </div>
 
         {/* Target Info */}
@@ -67,11 +90,13 @@ export function ActiveTarget({ target, completedPomodoros, onClear }: ActiveTarg
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Flame className="w-3 h-3 text-rose-500" />
-              {completedPomodoros} {completedPomodoros === 1 ? "session" : "sessions"}
+              {completedPomodoros}{" "}
+              {completedPomodoros === 1 ? "session" : "sessions"}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-blue-500" />
-              {focusHours > 0 && `${focusHours}h `}{remainingMinutes}m focused
+              {focusHours > 0 && `${focusHours}h `}
+              {remainingMinutes}m focused
             </span>
           </div>
         </div>
@@ -87,6 +112,5 @@ export function ActiveTarget({ target, completedPomodoros, onClear }: ActiveTarg
         </Button>
       </div>
     </motion.div>
-  )
+  );
 }
-
