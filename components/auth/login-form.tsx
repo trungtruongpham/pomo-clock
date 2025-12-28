@@ -73,8 +73,14 @@ export function LoginForm() {
     try {
       const supabase = createClientSupabase();
 
+      // Get the current origin for redirect
+      const redirectTo = `${window.location.origin}/auth/confirm`;
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
+        options: {
+          redirectTo,
+        },
       });
 
       if (error) {
