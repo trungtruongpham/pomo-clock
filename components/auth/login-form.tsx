@@ -73,13 +73,17 @@ export function LoginForm() {
     try {
       const supabase = createClientSupabase();
 
-      // Get the current origin for redirect
-      const redirectTo = `${window.location.origin}/auth/confirm`;
+      // For OAuth, redirect to home page - the session will be established automatically
+      const redirectTo = window.location.origin;
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
         },
       });
 

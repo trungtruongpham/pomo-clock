@@ -163,13 +163,10 @@ const OneTapComponent = () => {
   }, [supabase.auth, isInitialized]);
 
   return (
-    <>
-      <Script
-        src="https://accounts.google.com/gsi/client"
-        strategy="lazyOnload"
-      />
-      <div id="oneTap" className="fixed top-0 right-0 z-[100]" />
-    </>
+    <Script 
+      src="https://accounts.google.com/gsi/client" 
+      strategy="lazyOnload"
+    />
   );
 };
 
